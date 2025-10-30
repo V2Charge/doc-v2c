@@ -3,23 +3,23 @@ info:
   title: V2C Thirdparty API
   description: |
     # Introduction
-    This is the V2C RESTful API (Application Programming Interface), which allows for interaction with V2C's RESTful web services. It enables controlling charging devices, managing RFID cards, retrieving statistics, and configuring specific device parameters.
+    This is the V2C RESTful API (Application Programming Interface), which facilitates interaction with V2C's web services. It enables **remote control of charging devices**, **management of RFID credentials**, **retrieval of charging statistics**, and **configuration of specific device parameters**.
 
-    With this API, you can use your e-Charger through applications or services you create yourself, without needing the official apps. This allows you to create automations or interesting services for your chargers through programming.
-    
+    This API allows you to integrate your e-Charger with self-developed applications or services, enabling the creation of custom automations and advanced functionalities for your charging points.
+
     # Authentication
-    The API uses a Token (API Key) for authentication. You must provide your personal token in the **`apikey`** header of every request. If the `apikey` is invalid or not provided, the API will return a **`401 Unauthorized`** error.
-    
+    The API uses a Bearer Token (API Key) for authentication. You must provide your personal token in the custom header **`apikey`** with every request. If the `apikey` is invalid or missing, the API will return a **`401 Unauthorized`** error.
+
     ## How to obtain your API Key
-    To obtain your authentication token, you can go to **v2c.cloud**, select the **API** section in the left-hand side menu, and generate it.
-    
+    To obtain your authentication token, log in to **v2c.cloud**, navigate to the **API** section in the left-hand menu, and generate your key.
+
     For more information, visit: https://v2charge.com/support/v2c-cloud/get-token-id-api-rest-cloud/
 
-    # Limitations (Rate Limit)
-    Each user has a limit of **1000 daily calls** (requests). If you require more calls, please contact support.
-    
-    All responses will include the following headers to help you monitor your usage:
-    
+    # Rate Limiting
+    Each user is subject to a rate limit of **1000 daily calls** (requests). Should you require a higher volume of calls, please contact V2C technical support.
+
+    All successful responses will include the following headers for usage monitoring:
+
     * **`RateLimit-Limit`**: The maximum number of requests allowed in the daily period (e.g., 1000).
     * **`RateLimit-Remaining`**: The number of requests remaining in the current daily period.
   version: 1.0.0
@@ -27,31 +27,207 @@ info:
     name: V2C Support
     email: info@v2charge.com
 servers:
-  - url: https://v2c.cloud/kong/v2c_service/thirdparty
+  - url: https://v2c.cloud/kong/v2c_service/
     description: V2C Production Server
 tags:
-  - name: Device Actions
-    description: Commands to control and configure devices (POST Actions).
-  - name: Device Service
-    description: Queries about device status and data (GET Queries).
-  - name: RFID
-    description: Management of RFID cards and readers.
-  - name: Statistics
-    description: Retrieval of charging statistics data.
-  - name: Firmware
-    description: Firmware version update and query.
-  - name: Pairing
-    description: Management of device pairings.
-  - name: Personalized Power
-    description: Management of personalized power configuration.
+  - name: Device Control & Configuration
+    description: Commands to remotely control and configure the core charging behavior and settings of devices (POST Actions).
+  - name: Device Status & Data Retrieval
+    description: Queries to obtain the current operational state and diagnostic data from the device (GET Queries).
+  - name: RFID Management
+    description: Administration of RFID cards, including registration, removal, and reader control.
+  - name: Charging Statistics
+    description: Retrieval of aggregated and session-specific data for charging history.
+  - name: Advanced Power Profiles
+    description: Management of personalized power configurations (e.g., Solar Mode profiles).
+  - name: Firmware Management
+    description: Management and query of the device's firmware version.
+  - name: Pairing Management
+    description: Management of device pairings associated with the user account.
 security:
   - apiKeyAuth: []
 paths:
+  /device/startcharge:
+    post:
+      tags:
+        - Device Control & Configuration
+      summary: Start or Resume Charging Session
+      description: Initiates or resumes the charging session on the specified device.
+      operationId: executeStartChargeCommand
+      parameters:
+        - name: deviceId
+          in: query
+          required: true
+          schema:
+            type: string
+          example: 'YOUR_DEVICE_ID'
+      responses:
+        '200':
+          description: Command executed successfully
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '500':
+          description: Server Exception
+      x-codeSamples:
+        - lang: curl
+          label: 'cURL'
+          source: |
+            curl -X 'POST' \
+              'https://v2c.cloud/kong/v2c_service/device/startcharge?deviceId=YOUR_DEVICE_ID' \
+              -H 'apikey: {APIKEY}'
+  /device/pausecharge:
+    post:
+      tags:
+        - Device Control & Configuration
+      summary: Pause Charging Session
+      description: Pauses the current charging session on the specified device.
+      operationId: executePauseChargeCommand
+      parameters:
+        - name: deviceId
+          in: query
+          required: true
+          schema:
+            type: string
+          example: 'YOUR_DEVICE_ID'
+      responses:
+        '200':
+          description: Command executed successfully
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '500':
+          description: Server Exception
+      x-codeSamples:
+        - lang: curl
+          label: 'cURL'
+          source: |
+            curl -X 'POST' \
+              'https://v2c.cloud/kong/v2c_service/device/pausecharge?deviceId=YOUR_DEVICE_ID' \
+              -H 'apikey: {APIKEY}'
+  /device/intensity:
+    post:
+      tags:
+        - Device Control & Configuration
+      summary: Set Maximum Charging Current
+      description: Updates the maximum charging current (in Amperes) allowed for the session.
+      operationId: executeChangeIntesityThirdpartyCommand
+      parameters:
+        - name: deviceId
+          in: query
+          required: true
+          schema:
+            type: string
+          example: 'YOUR_DEVICE_ID'
+        - name: value
+          in: query
+          required: true
+          schema:
+            type: string
+          example: '16'
+      responses:
+        '200':
+          description: Command executed successfully
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '500':
+          description: Server Exception
+      x-codeSamples:
+        - lang: curl
+          label: 'cURL'
+          source: |
+            curl -X 'POST' \
+              'https://v2c.cloud/kong/v2c_service/device/intensity?deviceId=YOUR_DEVICE_ID&value=16' \
+              -H 'apikey: {APIKEY}'
+  /device/locked:
+    post:
+      tags:
+        - Device Control & Configuration
+      summary: Lock/Unlock Charging Point
+      description: 'Locks or unlocks the charging point access. 0: Unlock, 1: Lock.'
+      operationId: executeLockChargeCommand
+      parameters:
+        - name: deviceId
+          in: query
+          required: true
+          schema:
+            type: string
+          example: 'DFL2JPV'
+        - name: value
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: ['0', '1']
+          example: '1'
+      responses:
+        '200':
+          description: Command executed successfully
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '500':
+          description: Server Exception
+      x-codeSamples:
+        - lang: curl
+          label: 'cURL (Lock)'
+          source: |
+            curl -X 'POST' \
+              'https://v2c.cloud/kong/v2c_service/device/locked?deviceId=DFL2JPV&value=1' \
+              -H 'apikey: {APIKEY}'
+        - lang: curl
+          label: 'cURL (Unlock)'
+          source: |
+            curl -X 'POST' \
+              'https://v2c.cloud/kong/v2c_service/device/locked?deviceId=DFL2JPV&value=0' \
+              -H 'apikey: {APIKEY}'
+  /device/dynamic:
+    post:
+      tags:
+        - Device Control & Configuration
+      summary: Activate/Deactivate Dynamic Power Control
+      description: 'Enables or disables dynamic power control (load balancing). 0: Dynamic Off, 1: Dynamic On.'
+      operationId: executeChangeDynamicCommand
+      parameters:
+        - name: deviceId
+          in: query
+          required: true
+          schema:
+            type: string
+          example: 'YOUR_DEVICE_ID'
+        - name: value
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: ['0', '1']
+          example: '1'
+      responses:
+        '200':
+          description: Command executed successfully
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '500':
+          description: Server Exception
+      x-codeSamples:
+        - lang: curl
+          label: 'cURL'
+          source: |
+            curl -X 'POST' \
+              'https://v2c.cloud/kong/v2c_service/device/dynamic?deviceId=YOUR_DEVICE_ID&value=1' \
+              -H 'apikey: {APIKEY}'
   /device/chargefvmode:
     post:
       tags:
-        - Device Actions
-      summary: Update CHARGE FV MODE value on device
+        - Device Control & Configuration
+      summary: Configure Photovoltaic (PV) Charging Mode
       description: 'Updates the photovoltaic charging mode. 0: PV + Minimum Power, 1: Exclusive PV, 2: Maximum Power.'
       operationId: executeChargeFVModeThirdpartyCommand
       parameters:
@@ -86,487 +262,14 @@ paths:
           label: 'cURL'
           source: |
             curl -X 'POST' \
-              'https://v2c.cloud/kong/v2c_service/thirdparty/device/chargefvmode?deviceId=YOUR_DEVICE_ID&value=1' \
-              -H 'apikey: {APIKEY}'
-  /device/slave_type:
-    post:
-      tags:
-        - Device Actions
-      summary: Update SLAVE_TYPE value on device
-      description: 'Updates the connected slave (meter) type. 0: Shelly, 1: V2C v2, 3: Huawei, 4: Solax, etc.'
-      operationId: executeChangeSlaveTipeCommand
-      parameters:
-        - name: deviceId
-          in: query
-          required: true
-          schema:
-            type: string
-          example: 'YOUR_DEVICE_ID'
-        - name: value
-          in: query
-          required: true
-          schema:
-            type: string
-          example: '3'
-      responses:
-        '200':
-          description: Command executed successfully
-        '400':
-          description: Bad Request
-        '401':
-          description: Unauthorized
-        '500':
-          description: Server Exception
-      x-codeSamples:
-        - lang: curl
-          label: 'cURL'
-          source: |
-            curl -X 'POST' \
-              'https://v2c.cloud/kong/v2c_service/thirdparty/device/slave_type?deviceId=YOUR_DEVICE_ID&value=3' \
-              -H 'apikey: {APIKEY}'
-  /device/currentstatecharge:
-    post:
-      tags:
-        - Device Actions
-      summary: Get CURRENT STATE CHARGE value from device
-      description: 'Gets the current charging status. 0: State A, 1: State B, 2: State C.'
-      operationId: executeCurrentStateChargeCommand
-      parameters:
-        - name: deviceId
-          in: query
-          required: true
-          schema:
-            type: string
-          example: 'YOUR_DEVICE_ID'
-      responses:
-        '200':
-          description: Command executed successfully
-        '400':
-          description: Bad Request
-        '401':
-          description: Unauthorized
-        '500':
-          description: Server Exception
-      x-codeSamples:
-        - lang: curl
-          label: 'cURL'
-          source: |
-            curl -X 'POST' \
-              'https://v2c.cloud/kong/v2c_service/thirdparty/device/currentstatecharge?deviceId=YOUR_DEVICE_ID' \
-              -H 'apikey: {APIKEY}'
-  /device/charger_until_energy:
-    post:
-      tags:
-        - Device Actions
-      summary: Set Charger until energy value on device
-      description: Configures the device to charge up to a specific amount of energy.
-      operationId: executeChargerUntilEnergyCommand
-      parameters:
-        - name: deviceId
-          in: query
-          required: true
-          schema:
-            type: string
-          example: 'YOUR_DEVICE_ID'
-        - name: value
-          in: query
-          required: true
-          schema:
-            type: string
-          example: '10'
-      responses:
-        '200':
-          description: Command executed successfully
-        '400':
-          description: Bad Request
-        '401':
-          description: Unauthorized
-        '500':
-          description: Server Exception
-      x-codeSamples:
-        - lang: curl
-          label: 'cURL'
-          source: |
-            curl -X 'POST' \
-              'https://v2c.cloud/kong/v2c_service/thirdparty/device/charger_until_energy?deviceId=YOUR_DEVICE_ID&value=10' \
-              -H 'apikey: {APIKEY}'
-  /device/charger_until_minutes:
-    post:
-      tags:
-        - Device Actions
-      summary: Set Charger until minutes value on device
-      description: Configures the device to charge for a specific number of minutes.
-      operationId: executeChargerUntilMinutesCommand
-      parameters:
-        - name: deviceId
-          in: query
-          required: true
-          schema:
-            type: string
-          example: 'YOUR_DEVICE_ID'
-        - name: value
-          in: query
-          required: true
-          schema:
-            type: string
-          example: '60'
-      responses:
-        '200':
-          description: Command executed successfully
-        '400':
-          description: Bad Request
-        '401':
-          description: Unauthorized
-        '500':
-          description: Server Exception
-      x-codeSamples:
-        - lang: curl
-          label: 'cURL'
-          source: |
-            curl -X 'POST' \
-              'https://v2c.cloud/kong/v2c_service/thirdparty/device/charger_until_minutes?deviceId=YOUR_DEVICE_ID&value=60' \
-              -H 'apikey: {APIKEY}'
-  /device/thirdparty_mode:
-    post:
-      tags:
-        - Device Actions
-      summary: Set thirdparty mode on device
-      description: Activates or deactivates third-party API control mode.
-      operationId: executeThirdPartyModeCommand
-      parameters:
-        - name: deviceId
-          in: query
-          required: true
-          schema:
-            type: string
-          example: 'YOUR_DEVICE_ID'
-        - name: mode
-          in: query
-          required: true
-          schema:
-            type: string
-          example: '1'
-        - name: value
-          in: query
-          required: true
-          schema:
-            type: string
-          example: '1'
-      responses:
-        '200':
-          description: Command executed successfully
-        '400':
-          description: Bad Request
-        '401':
-          description: Unauthorized
-        '500':
-          description: Server Exception
-      x-codeSamples:
-        - lang: curl
-          label: 'cURL'
-          source: |
-            curl -X 'POST' \
-              'https://v2c.cloud/kong/v2c_service/thirdparty/device/thirdparty_mode?deviceId=YOUR_DEVICE_ID&mode=1&value=1' \
-              -H 'apikey: {APIKEY}'
-  /device/dynamic:
-    post:
-      tags:
-        - Device Actions
-      summary: Update DYNAMIC value on device
-      description: 'Activates or deactivates dynamic power control. 0: dynamic off, 1: dynamic on.'
-      operationId: executeChangeDynamicCommand
-      parameters:
-        - name: deviceId
-          in: query
-          required: true
-          schema:
-            type: string
-          example: 'YOUR_DEVICE_ID'
-        - name: value
-          in: query
-          required: true
-          schema:
-            type: string
-            enum: ['0', '1']
-          example: '1'
-      responses:
-        '200':
-          description: Command executed successfully
-        '400':
-          description: Bad Request
-        '401':
-          description: Unauthorized
-        '500':
-          description: Server Exception
-      x-codeSamples:
-        - lang: curl
-          label: 'cURL'
-          source: |
-            curl -X 'POST' \
-              'https://v2c.cloud/kong/v2c_service/thirdparty/device/dynamic?deviceId=YOUR_DEVICE_ID&value=1' \
-              -H 'apikey: {APIKEY}'
-  /device/logo_led:
-    post:
-      tags:
-        - Device Actions
-      summary: Execute logo led switch command on device
-      description: Turns the device's logo LED on or off.
-      operationId: executeLogoLedCommand
-      parameters:
-        - name: deviceId
-          in: query
-          required: true
-          schema:
-            type: string
-          example: 'YOUR_DEVICE_ID'
-        - name: value
-          in: query
-          required: true
-          schema:
-            type: string
-            enum: ['0', '1']
-          example: '1'
-      responses:
-        '200':
-          description: Command executed successfully
-        '400':
-          description: Bad Request
-        '401':
-          description: Unauthorized
-        '500':
-          description: Server Exception
-      x-codeSamples:
-        - lang: curl
-          label: 'cURL'
-          source: |
-            curl -X 'POST' \
-              'https://v2c.cloud/kong/v2c_service/thirdparty/device/logo_led?deviceId=YOUR_DEVICE_ID&value=1' \
-              -H 'apikey: {APIKEY}'
-  /device/inst_type:
-    post:
-      tags:
-        - Device Actions
-      summary: Update INSTALLATION TYPE value on device
-      description: 'Updates the installation type. 0: Monophase, 1: Three-phase, 2: Photovoltaic.'
-      operationId: executeChangeInstalationTypeCommand
-      parameters:
-        - name: deviceId
-          in: query
-          required: true
-          schema:
-            type: string
-          example: 'YOUR_DEVICE_ID'
-        - name: value
-          in: query
-          required: true
-          schema:
-            type: string
-            enum: ['0', '1', '2']
-          example: '0'
-      responses:
-        '200':
-          description: Command executed successfully
-        '400':
-          description: Bad Request
-        '401':
-          description: Unauthorized
-        '500':
-          description: Server Exception
-      x-codeSamples:
-        - lang: curl
-          label: 'cURL'
-          source: |
-            curl -X 'POST' \
-              'https://v2c.cloud/kong/v2c_service/thirdparty/device/inst_type?deviceId=YOUR_DEVICE_ID&value=0' \
-              -H 'apikey: {APIKEY}'
-  /device/intensity:
-    post:
-      tags:
-        - Device Actions
-      summary: Update INTENSITY value on device
-      description: Updates the charging intensity (amperes).
-      operationId: executeChangeIntesityThirdpartyCommand
-      parameters:
-        - name: deviceId
-          in: query
-          required: true
-          schema:
-            type: string
-          example: 'YOUR_DEVICE_ID'
-        - name: value
-          in: query
-          required: true
-          schema:
-            type: string
-          example: '16'
-      responses:
-        '200':
-          description: Command executed successfully
-        '400':
-          description: Bad Request
-        '401':
-          description: Unauthorized
-        '500':
-          description: Server Exception
-      x-codeSamples:
-        - lang: curl
-          label: 'cURL'
-          source: |
-            curl -X 'POST' \
-              'https://v2c.cloud/kong/v2c_service/thirdparty/device/intensity?deviceId=YOUR_DEVICE_ID&value=16' \
-              -H 'apikey: {APIKEY}'
-  /device/language:
-    post:
-      tags:
-        - Device Actions
-      summary: Update Language value on device
-      description: Changes the devices language. Values 0-English, 1-Spanish, 2-Portuguese.
-      operationId: executeChangeLanguageCommand
-      parameters:
-        - name: deviceId
-          in: query
-          required: true
-          schema:
-            type: string
-          example: 'YOUR_DEVICE_ID'
-        - name: value
-          in: query
-          required: true
-          schema:
-            type: string
-            enum: ['0', '1', '2', '3', '4', '5', '6']
-          example: '1'
-      responses:
-        '200':
-          description: Command executed successfully
-        '400':
-          description: Bad Request
-        '401':
-          description: Unauthorized
-        '500':
-          description: Server Exception
-      x-codeSamples:
-        - lang: curl
-          label: 'cURL'
-          source: |
-            curl -X 'POST' \
-              'https://v2c.cloud/kong/v2c_service/thirdparty/device/language?deviceId=YOUR_DEVICE_ID&value=1' \
-              -H 'apikey: {APIKEY}'
-  /device/locked:
-    post:
-      tags:
-        - Device Actions
-      summary: Execute LOCK CHARGEPOINT command on device
-      description: 'Locks or unlocks the charging point. 0: Unlock, 1: Lock.'
-      operationId: executeLockChargeCommand
-      parameters:
-        - name: deviceId
-          in: query
-          required: true
-          schema:
-            type: string
-          example: 'DFL2JPV'
-        - name: value
-          in: query
-          required: true
-          schema:
-            type: string
-            enum: ['0', '1']
-          example: '1'
-      responses:
-        '200':
-          description: Command executed successfully
-        '400':
-          description: Bad Request
-        '401':
-          description: Unauthorized
-        '500':
-          description: Server Exception
-      x-codeSamples:
-        - lang: curl
-          label: 'cURL (Lock)'
-          source: |
-            curl -X 'POST' \
-              'https://v2c.cloud/kong/v2c_service/thirdparty/device/locked?deviceId=DFL2JPV&value=1' \
-              -H 'apikey: {APIKEY}'
-        - lang: curl
-          label: 'cURL (Unlock)'
-          source: |
-            curl -X 'POST' \
-              'https://v2c.cloud/kong/v2c_service/thirdparty/device/locked?deviceId=DFL2JPV&value=0' \
-              -H 'apikey: {APIKEY}'
-  /device/mac:
-    post:
-      tags:
-        - Device Actions
-      summary: Get MAC value from device
-      description: Gets the device's MAC address.
-      operationId: executeGetMacCommand
-      parameters:
-        - name: deviceId
-          in: query
-          required: true
-          schema:
-            type: string
-          example: 'YOUR_DEVICE_ID'
-      responses:
-        '200':
-          description: Command executed successfully
-        '400':
-          description: Bad Request
-        '401':
-          description: Unauthorized
-        '500':
-          description: Server Exception
-      x-codeSamples:
-        - lang: curl
-          label: 'cURL'
-          source: |
-            curl -X 'POST' \
-              'https://v2c.cloud/kong/v2c_service/thirdparty/device/mac?deviceId=YOUR_DEVICE_ID' \
-              -H 'apikey: {APIKEY}'
-  /device/max_car_int:
-    post:
-      tags:
-        - Device Actions
-      summary: Update MAX CAR INTENSITY value on device
-      description: Updates the maximum intensity (amperes) the car can accept.
-      operationId: executeChangeMaxCarIntesityCommand
-      parameters:
-        - name: deviceId
-          in: query
-          required: true
-          schema:
-            type: string
-          example: 'YOUR_DEVICE_ID'
-        - name: value
-          in: query
-          required: true
-          schema:
-            type: string
-          example: '32'
-      responses:
-        '200':
-          description: Command executed successfully
-        '400':
-          description: Bad Request
-        '401':
-          description: Unauthorized
-        '500':
-          description: Server Exception
-      x-codeSamples:
-        - lang: curl
-          label: 'cURL'
-          source: |
-            curl -X 'POST' \
-              'https://v2c.cloud/kong/v2c_service/thirdparty/device/max_car_int?deviceId=YOUR_DEVICE_ID&value=32' \
+              'https://v2c.cloud/kong/v2c_service/device/chargefvmode?deviceId=YOUR_DEVICE_ID&value=1' \
               -H 'apikey: {APIKEY}'
   /device/maxpower:
     post:
       tags:
-        - Device Actions
-      summary: Update MAXPOWER value on device
-      description: Updates the maximum installation power.
+        - Device Control & Configuration
+      summary: Set Maximum Installation Power (Watts)
+      description: Updates the maximum power (in Watts) allowed for the entire electrical installation.
       operationId: executeChangeMaxPowerInstallationCommand
       parameters:
         - name: deviceId
@@ -595,15 +298,15 @@ paths:
           label: 'cURL'
           source: |
             curl -X 'POST' \
-              'https://v2c.cloud/kong/v2c_service/thirdparty/device/maxpower?deviceId=YOUR_DEVICE_ID&value=5750' \
+              'https://v2c.cloud/kong/v2c_service/device/maxpower?deviceId=YOUR_DEVICE_ID&value=5750' \
               -H 'apikey: {APIKEY}'
-  /device/denka/max_power:
+  /device/max_car_int:
     post:
       tags:
-        - Device Actions
-      summary: Update DENKAMAXPOWER value on device
-      description: Updates the maximum power for Denka.
-      operationId: executeChangeMaxPowerCommand
+        - Device Control & Configuration
+      summary: Set Vehicle Maximum Accepted Current
+      description: Updates the maximum charging current (in Amperes) that the connected electric vehicle (EV) can accept.
+      operationId: executeChangeMaxCarIntesityCommand
       parameters:
         - name: deviceId
           in: query
@@ -616,7 +319,7 @@ paths:
           required: true
           schema:
             type: string
-          example: '5000'
+          example: '32'
       responses:
         '200':
           description: Command executed successfully
@@ -631,14 +334,14 @@ paths:
           label: 'cURL'
           source: |
             curl -X 'POST' \
-              'https://v2c.cloud/kong/v2c_service/thirdparty/device/denka/max_power?deviceId=YOUR_DEVICE_ID&value=5000' \
+              'https://v2c.cloud/kong/v2c_service/device/max_car_int?deviceId=YOUR_DEVICE_ID&value=32' \
               -H 'apikey: {APIKEY}'
   /device/min_car_int:
     post:
       tags:
-        - Device Actions
-      summary: Update MIN CAR INTENSITY value on device
-      description: Updates the minimum intensity (amperes) the car accepts for charging.
+        - Device Control & Configuration
+      summary: Set Vehicle Minimum Accepted Current
+      description: Updates the minimum charging current (in Amperes) that the connected electric vehicle (EV) requires to charge.
       operationId: executeChangeMinCarIntesityCommand
       parameters:
         - name: deviceId
@@ -667,15 +370,15 @@ paths:
           label: 'cURL'
           source: |
             curl -X 'POST' \
-              'https://v2c.cloud/kong/v2c_service/thirdparty/device/min_car_int?deviceId=YOUR_DEVICE_ID&value=6' \
+              'https://v2c.cloud/kong/v2c_service/device/min_car_int?deviceId=YOUR_DEVICE_ID&value=6' \
               -H 'apikey: {APIKEY}'
-  /device/pausecharge:
+  /device/charger_until_energy:
     post:
       tags:
-        - Device Actions
-      summary: Execute PAUSE CHARGE command on device
-      description: Pauses the current charging session.
-      operationId: executePauseChargeCommand
+        - Device Control & Configuration
+      summary: Program Charge by Energy (kWh)
+      description: Configures the device to automatically stop charging after a specific amount of energy (in kWh) has been delivered.
+      operationId: executeChargerUntilEnergyCommand
       parameters:
         - name: deviceId
           in: query
@@ -683,6 +386,12 @@ paths:
           schema:
             type: string
           example: 'YOUR_DEVICE_ID'
+        - name: value
+          in: query
+          required: true
+          schema:
+            type: string
+          example: '10'
       responses:
         '200':
           description: Command executed successfully
@@ -697,15 +406,15 @@ paths:
           label: 'cURL'
           source: |
             curl -X 'POST' \
-              'https://v2c.cloud/kong/v2c_service/thirdparty/device/pausecharge?deviceId=YOUR_DEVICE_ID' \
+              'https://v2c.cloud/kong/v2c_service/device/charger_until_energy?deviceId=YOUR_DEVICE_ID&value=10' \
               -H 'apikey: {APIKEY}'
-  /device/reboot:
+  /device/charger_until_minutes:
     post:
       tags:
-        - Device Actions
-      summary: Execute REBOOT command on device
-      description: Reboots the device.
-      operationId: executeRebootCommand
+        - Device Control & Configuration
+      summary: Program Charge by Time (Minutes)
+      description: Configures the device to automatically stop charging after a specific duration (in minutes).
+      operationId: executeChargerUntilMinutesCommand
       parameters:
         - name: deviceId
           in: query
@@ -713,6 +422,12 @@ paths:
           schema:
             type: string
           example: 'YOUR_DEVICE_ID'
+        - name: value
+          in: query
+          required: true
+          schema:
+            type: string
+          example: '60'
       responses:
         '200':
           description: Command executed successfully
@@ -727,80 +442,14 @@ paths:
           label: 'cURL'
           source: |
             curl -X 'POST' \
-              'https://v2c.cloud/kong/v2c_service/thirdparty/device/reboot?deviceId=YOUR_DEVICE_ID' \
-              -H 'apikey: {APIKEY}'
-  /device/startcharge:
-    post:
-      tags:
-        - Device Actions
-      summary: Execute START CHARGE command on device
-      description: Starts (or resumes) the charging session.
-      operationId: executeStartChargeCommand
-      parameters:
-        - name: deviceId
-          in: query
-          required: true
-          schema:
-            type: string
-          example: 'YOUR_DEVICE_ID'
-      responses:
-        '200':
-          description: Command executed successfully
-        '400':
-          description: Bad Request
-        '401':
-          description: Unauthorized
-        '500':
-          description: Server Exception
-      x-codeSamples:
-        - lang: curl
-          label: 'cURL'
-          source: |
-            curl -X 'POST' \
-              'https://v2c.cloud/kong/v2c_service/thirdparty/device/startcharge?deviceId=YOUR_DEVICE_ID' \
-              -H 'apikey: {APIKEY}'
-  /device/startchargeminutes:
-    post:
-      tags:
-        - Device Actions
-      summary: Execute START CHARGE MINUTES command on device
-      description: Starts a scheduled charge for a number of minutes.
-      operationId: executeStartChargeMinutesCommand
-      parameters:
-        - name: deviceId
-          in: query
-          required: true
-          schema:
-            type: string
-          example: 'YOUR_DEVICE_ID'
-        - name: minutes
-          in: query
-          required: true
-          schema:
-            type: string
-          example: '120'
-      responses:
-        '200':
-          description: Command executed successfully
-        '400':
-          description: Bad Request
-        '401':
-          description: Unauthorized
-        '500':
-          description: Server Exception
-      x-codeSamples:
-        - lang: curl
-          label: 'cURL'
-          source: |
-            curl -X 'POST' \
-              'https://v2c.cloud/kong/v2c_service/thirdparty/device/startchargeminutes?deviceId=YOUR_DEVICE_ID&minutes=120' \
+              'https://v2c.cloud/kong/v2c_service/device/charger_until_minutes?deviceId=YOUR_DEVICE_ID&value=60' \
               -H 'apikey: {APIKEY}'
   /device/startchargekw:
     post:
       tags:
-        - Device Actions
-      summary: Execute START CHARGE KW command on device
-      description: Starts a scheduled charge for a kWh amount.
+        - Device Control & Configuration
+      summary: Start Scheduled Charge by Energy (kWh)
+      description: Starts a charging session that is scheduled to stop after delivering a specified amount of energy (in kWh).
       operationId: executeStartChargeKWCommand
       parameters:
         - name: deviceId
@@ -829,14 +478,15 @@ paths:
           label: 'cURL'
           source: |
             curl -X 'POST' \
-              'https://v2c.cloud/kong/v2c_service/thirdparty/device/startchargekw?deviceId=YOUR_DEVICE_ID&kw=15' \
+              'https://v2c.cloud/kong/v2c_service/device/startchargekw?deviceId=YOUR_DEVICE_ID&kw=15' \
               -H 'apikey: {APIKEY}'
-  /device/apk2:
+  /device/startchargeminutes:
     post:
       tags:
-        - Device Actions
-      summary: Execute START CHARGE APK2 command on device
-      operationId: executeAPK2Command
+        - Device Control & Configuration
+      summary: Start Scheduled Charge by Time
+      description: Starts a charging session that is scheduled to stop after a specified number of minutes.
+      operationId: executeStartChargeMinutesCommand
       parameters:
         - name: deviceId
           in: query
@@ -844,12 +494,12 @@ paths:
           schema:
             type: string
           example: 'YOUR_DEVICE_ID'
-        - name: value
+        - name: minutes
           in: query
           required: true
           schema:
             type: string
-          example: 'some_value'
+          example: '120'
       responses:
         '200':
           description: Command executed successfully
@@ -864,14 +514,14 @@ paths:
           label: 'cURL'
           source: |
             curl -X 'POST' \
-              'https://v2c.cloud/kong/v2c_service/thirdparty/device/apk2?deviceId=YOUR_DEVICE_ID&value=some_value' \
+              'https://v2c.cloud/kong/v2c_service/device/startchargeminutes?deviceId=YOUR_DEVICE_ID&minutes=120' \
               -H 'apikey: {APIKEY}'
   /device/timer:
     post:
       tags:
-        - Device Actions
-      summary: Update CHARGE TIMER values on device
-      description: Programs a timer (timerId) on the device.
+        - Device Control & Configuration
+      summary: Program Charging Timer
+      description: Configures a start/end time timer (timerId) on the device for scheduled charging.
       operationId: programTimerCommand
       parameters:
         - name: deviceId
@@ -906,7 +556,7 @@ paths:
           label: 'cURL'
           source: |
             curl -X 'POST' \
-              'https://v2c.cloud/kong/v2c_service/thirdparty/device/timer?deviceId=YOUR_DEVICE_ID&timer%20id=1' \
+              'https://v2c.cloud/kong/v2c_service/device/timer?deviceId=YOUR_DEVICE_ID&timer%20id=1' \
               -H 'apikey: {APIKEY}' \
               -H 'Content-Type: application/json' \
               -d '{
@@ -914,12 +564,276 @@ paths:
                 "end_time": "06:00",
                 "active": true
               }'
+  /device/thirdparty_mode:
+    post:
+      tags:
+        - Device Control & Configuration
+      summary: Enable/Disable Third-Party API Control Mode
+      description: Enables or disables the device's control mode via the third-party API.
+      operationId: executeThirdPartyModeCommand
+      parameters:
+        - name: deviceId
+          in: query
+          required: true
+          schema:
+            type: string
+          example: 'YOUR_DEVICE_ID'
+        - name: mode
+          in: query
+          required: true
+          schema:
+            type: string
+          example: '1'
+        - name: value
+          in: query
+          required: true
+          schema:
+            type: string
+          example: '1'
+      responses:
+        '200':
+          description: Command executed successfully
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '500':
+          description: Server Exception
+      x-codeSamples:
+        - lang: curl
+          label: 'cURL'
+          source: |
+            curl -X 'POST' \
+              'https://v2c.cloud/kong/v2c_service/device/thirdparty_mode?deviceId=YOUR_DEVICE_ID&mode=1&value=1' \
+              -H 'apikey: {APIKEY}'
+  /device/inst_type:
+    post:
+      tags:
+        - Device Control & Configuration
+      summary: Set Installation Type
+      description: 'Updates the electrical installation type. 0: Monophase, 1: Three-phase, 2: Photovoltaic.'
+      operationId: executeChangeInstalationTypeCommand
+      parameters:
+        - name: deviceId
+          in: query
+          required: true
+          schema:
+            type: string
+          example: 'YOUR_DEVICE_ID'
+        - name: value
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: ['0', '1', '2']
+          example: '0'
+      responses:
+        '200':
+          description: Command executed successfully
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '500':
+          description: Server Exception
+      x-codeSamples:
+        - lang: curl
+          label: 'cURL'
+          source: |
+            curl -X 'POST' \
+              'https://v2c.cloud/kong/v2c_service/device/inst_type?deviceId=YOUR_DEVICE_ID&value=0' \
+              -H 'apikey: {APIKEY}'
+  /device/ocpp:
+    post:
+      tags:
+        - Device Control & Configuration
+      summary: Enable/Disable OCPP Functionality
+      description: 'Activates or deactivates the Open Charge Point Protocol (OCPP) functionality. 0: OCPP Off, 1: OCPP On.'
+      operationId: executeChangeOcppCommand
+      parameters:
+        - name: id
+          in: query
+          description: The device's ID
+          required: true
+          schema:
+            type: string
+          example: 'YOUR_DEVICE_ID'
+        - name: value
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: ['0', '1']
+          example: '1'
+      responses:
+        '200':
+          description: Command executed successfully
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '500':
+          description: Server Exception
+      x-codeSamples:
+        - lang: curl
+          label: 'cURL'
+          source: |
+            curl -X 'POST' \
+              'https://v2c.cloud/kong/v2c_service/device/ocpp?id=YOUR_DEVICE_ID&value=1' \
+              -H 'apikey: {APIKEY}'
+  /device/ocpp_id:
+    post:
+      tags:
+        - Device Control & Configuration
+      summary: Configure OCPP Charge Point ID
+      description: Configures the unique Charge Point Identifier for OCPP communication.
+      operationId: executeChangeOcppIdCommand
+      parameters:
+        - name: id
+          in: query
+          description: The device's ID
+          required: true
+          schema:
+            type: string
+          example: 'YOUR_DEVICE_ID'
+        - name: value
+          in: query
+          required: true
+          schema:
+            type: string
+          example: 'V2C_Charger_001'
+      responses:
+        '200':
+          description: Command executed successfully
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '500':
+          description: Server Exception
+      x-codeSamples:
+        - lang: curl
+          label: 'cURL'
+          source: |
+            curl -X 'POST' \
+              'https://v2c.cloud/kong/v2c_service/device/ocpp_id?id=YOUR_DEVICE_ID&value=V2C_Charger_001' \
+              -H 'apikey: {APIKEY}'
+  /device/ocpp_addr:
+    post:
+      tags:
+        - Device Control & Configuration
+      summary: Configure OCPP Server Address (URL)
+      description: Configures the endpoint URL for the central OCPP server.
+      operationId: executeChangeOcppAddrCommand
+      parameters:
+        - name: id
+          in: query
+          description: The device's ID
+          required: true
+          schema:
+            type: string
+          example: 'YOUR_DEVICE_ID'
+        - name: value
+          in: query
+          required: true
+          schema:
+            type: string
+          example: 'ws://ocpp.server.com/endpoint'
+      responses:
+        '200':
+          description: Command executed successfully
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '500':
+          description: Server Exception
+      x-codeSamples:
+        - lang: curl
+          label: 'cURL'
+          source: |
+            curl -X 'POST' \
+              'https://v2c.cloud/kong/v2c_service/device/ocpp_addr?id=YOUR_DEVICE_ID&value=ws%3A%2F%2Focpp.server.com%2Fendpoint' \
+              -H 'apikey: {APIKEY}'
+  /device/denka/max_power:
+    post:
+      tags:
+        - Device Control & Configuration
+      summary: Set Denka Maximum Power
+      description: Updates the maximum power setting for Denka devices.
+      operationId: executeChangeMaxPowerCommand
+      parameters:
+        - name: deviceId
+          in: query
+          required: true
+          schema:
+            type: string
+          example: 'YOUR_DEVICE_ID'
+        - name: value
+          in: query
+          required: true
+          schema:
+            type: string
+          example: '5000'
+      responses:
+        '200':
+          description: Command executed successfully
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '500':
+          description: Server Exception
+      x-codeSamples:
+        - lang: curl
+          label: 'cURL'
+          source: |
+            curl -X 'POST' \
+              'https://v2c.cloud/kong/v2c_service/device/denka/max_power?deviceId=YOUR_DEVICE_ID&value=5000' \
+              -H 'apikey: {APIKEY}'
+  /device/inverter_ip:
+    post:
+      tags:
+        - Device Control & Configuration
+      summary: Configure Inverter IP Address
+      description: Configures the IP address of the connected solar inverter (e.g., Huawei).
+      operationId: executeChangeHuaweiIPCommand
+      parameters:
+        - name: id
+          in: query
+          description: The device's ID
+          required: true
+          schema:
+            type: string
+          example: 'YOUR_DEVICE_ID'
+        - name: value
+          in: query
+          required: true
+          schema:
+            type: string
+          example: '192.168.1.100'
+      responses:
+        '200':
+          description: Command executed successfully
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '500':
+          description: Server Exception
+      x-codeSamples:
+        - lang: curl
+          label: 'cURL'
+          source: |
+            curl -X 'POST' \
+              'https://v2c.cloud/kong/v2c_service/device/inverter_ip?id=YOUR_DEVICE_ID&value=192.168.1.100' \
+              -H 'apikey: {APIKEY}'
   /device/wifi:
     post:
       tags:
-        - Device Actions
-      summary: Update WIFI values on device
-      description: Configures the device's WiFi connection.
+        - Device Control & Configuration
+      summary: Configure Device WiFi Connection
+      description: Updates the device's WiFi network credentials (SSID and Password).
       operationId: executeChangeWifiCommand
       parameters:
         - name: deviceId
@@ -954,15 +868,125 @@ paths:
           label: 'cURL'
           source: |
             curl -X 'POST' \
-              'https://v2c.cloud/kong/v2c_service/thirdparty/device/wifi?deviceId=YOUR_DEVICE_ID&ssid=MyWifiNetwork&password=MyWifiPassword123' \
+              'https://v2c.cloud/kong/v2c_service/device/wifi?deviceId=YOUR_DEVICE_ID&ssid=MyWifiNetwork&password=MyWifiPassword123' \
               -H 'apikey: {APIKEY}'
-  /device/connected:
-    get:
+  /device/slave_type:
+    post:
       tags:
-        - Device Service
-      summary: Get CONNECTED value from device
-      description: Checks if the device is currently connected to V2C Cloud.
-      operationId: isConnected
+        - Device Control & Configuration
+      summary: Set Connected Meter (Slave) Type
+      description: 'Updates the connected energy meter (slave) type for load balancing. 0: Shelly, 1: V2C v2, 3: Huawei, 4: Solax, etc.'
+      operationId: executeChangeSlaveTipeCommand
+      parameters:
+        - name: deviceId
+          in: query
+          required: true
+          schema:
+            type: string
+          example: 'YOUR_DEVICE_ID'
+        - name: value
+          in: query
+          required: true
+          schema:
+            type: string
+          example: '3'
+      responses:
+        '200':
+          description: Command executed successfully
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '500':
+          description: Server Exception
+      x-codeSamples:
+        - lang: curl
+          label: 'cURL'
+          source: |
+            curl -X 'POST' \
+              'https://v2c.cloud/kong/v2c_service/device/slave_type?deviceId=YOUR_DEVICE_ID&value=3' \
+              -H 'apikey: {APIKEY}'
+  /device/language:
+    post:
+      tags:
+        - Device Control & Configuration
+      summary: Set Device Language
+      description: 'Changes the device''s display language. Values include 0: English, 1: Spanish, 2: Portuguese, etc.'
+      operationId: executeChangeLanguageCommand
+      parameters:
+        - name: deviceId
+          in: query
+          required: true
+          schema:
+            type: string
+          example: 'YOUR_DEVICE_ID'
+        - name: value
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: ['0', '1', '2', '3', '4', '5', '6']
+          example: '1'
+      responses:
+        '200':
+          description: Command executed successfully
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '500':
+          description: Server Exception
+      x-codeSamples:
+        - lang: curl
+          label: 'cURL'
+          source: |
+            curl -X 'POST' \
+              'https://v2c.cloud/kong/v2c_service/device/language?deviceId=YOUR_DEVICE_ID&value=1' \
+              -H 'apikey: {APIKEY}'
+  /device/logo_led:
+    post:
+      tags:
+        - Device Control & Configuration
+      summary: Control Device Logo LED Status
+      description: Turns the device's logo LED light on or off.
+      operationId: executeLogoLedCommand
+      parameters:
+        - name: deviceId
+          in: query
+          required: true
+          schema:
+            type: string
+          example: 'YOUR_DEVICE_ID'
+        - name: value
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: ['0', '1']
+          example: '1'
+      responses:
+        '200':
+          description: Command executed successfully
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '500':
+          description: Server Exception
+      x-codeSamples:
+        - lang: curl
+          label: 'cURL'
+          source: |
+            curl -X 'POST' \
+              'https://v2c.cloud/kong/v2c_service/device/logo_led?deviceId=YOUR_DEVICE_ID&value=1' \
+              -H 'apikey: {APIKEY}'
+  /device/reboot:
+    post:
+      tags:
+        - Device Control & Configuration
+      summary: Reboot Device
+      description: Executes a remote reboot command on the device.
+      operationId: executeRebootCommand
       parameters:
         - name: deviceId
           in: query
@@ -983,15 +1007,150 @@ paths:
         - lang: curl
           label: 'cURL'
           source: |
-            curl -X 'GET' \
-              'https://v2c.cloud/kong/v2c_service/thirdparty/device/connected?deviceId=YOUR_DEVICE_ID' \
+            curl -X 'POST' \
+              'https://v2c.cloud/kong/v2c_service/device/reboot?deviceId=YOUR_DEVICE_ID' \
+              -H 'apikey: {APIKEY}'
+  /device/apk2:
+    post:
+      tags:
+        - Device Control & Configuration
+      summary: Execute APK2 Command
+      description: Executes an internal APK2 command on the device.
+      operationId: executeAPK2Command
+      parameters:
+        - name: deviceId
+          in: query
+          required: true
+          schema:
+            type: string
+          example: 'YOUR_DEVICE_ID'
+        - name: value
+          in: query
+          required: true
+          schema:
+            type: string
+          example: 'some_value'
+      responses:
+        '200':
+          description: Command executed successfully
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '500':
+          description: Server Exception
+      x-codeSamples:
+        - lang: curl
+          label: 'cURL'
+          source: |
+            curl -X 'POST' \
+              'https://v2c.cloud/kong/v2c_service/device/apk2?deviceId=YOUR_DEVICE_ID&value=some_value' \
+              -H 'apikey: {APIKEY}'
+  /device/currentstatecharge:
+    post:
+      tags:
+        - Device Status & Data Retrieval
+      summary: Retrieve Current State Charge Data
+      description: Retrieves the device's comprehensive operational data, including charging status, power metrics, and error codes.
+      operationId: executeCurrentStateChargeCommand
+      parameters:
+        - name: deviceId
+          in: query
+          required: true
+          schema:
+            type: string
+          example: 'YOUR_DEVICE_ID'
+      responses:
+        '200':
+          description: Command executed successfully. Returns device's real-time charging status.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CurrentStateChargeResponse'
+              examples:
+                trydan_device_data:
+                  summary: Trydan Device Data
+                  value:
+                    error: '244'
+                    battery: '0.000000'
+                    voltage: '230.50'
+                    intensity: '6'
+                    seconds: '93'
+                    photovoltaic_on: '1'
+                    house_power: '3.500000'
+                    charge_state: '2'
+                    power: '1.380000'
+                    sun_power: '1.500000'
+                    phases: '1'
+                    cp_level: '248.000000'
+                    energy: '0.000000'
+                pole_device_data:
+                  summary: Pole/Simplified Device Data
+                  value:
+                    seconds: 0
+                    photovoltaic_on: 0
+                    charge_state: '0'
+                    power: 0.0
+                    error: ''
+                    energy: 0.0
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '500':
+          description: Server Exception
+      x-codeSamples:
+        - lang: curl
+          label: 'cURL'
+          source: |
+            curl -X 'POST' \
+              'https://v2c.cloud/kong/v2c_service/thirdparty/device/currentstatecharge?deviceId=YOUR_DEVICE_ID' \
+              -H 'apikey: {APIKEY}'
+  /device/local_load_balancing:
+    post:
+      tags:
+        - Device Control & Configuration
+      summary: Enable/Disable Local Load Balancing (Deprecated)
+      description: 'Activates or deactivates local load balancing functionality. 0: Off, 1: On. This endpoint is deprecated, use /device/dynamic instead for dynamic load control.'
+      deprecated: true
+      operationId: executeChangeLocalLoadBalancingCommand
+      parameters:
+        - name: id
+          in: query
+          description: The device's ID
+          required: true
+          schema:
+            type: string
+          example: 'YOUR_DEVICE_ID'
+        - name: value
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: ['0', '1']
+          example: '1'
+      responses:
+        '200':
+          description: Command executed successfully
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '500':
+          description: Server Exception
+      x-codeSamples:
+        - lang: curl
+          label: 'cURL'
+          source: |
+            curl -X 'POST' \
+              'https://v2c.cloud/kong/v2c_service/device/local_load_balancing?id=YOUR_DEVICE_ID&value=1' \
               -H 'apikey: {APIKEY}'
   /device/reported:
     get:
       tags:
-        - Device Service
-      summary: Get REPORTED values from device
-      description: Gets the last reported status (shadow) from the device.
+        - Device Status & Data Retrieval
+      summary: Retrieve Device Last Reported Status (Shadow)
+      description: Gets the last known status and data reported by the device (the "shadow" state). This is the most comprehensive data endpoint.
       operationId: getReported
       parameters:
         - name: deviceId
@@ -1014,15 +1173,15 @@ paths:
           label: 'cURL'
           source: |
             curl -X 'GET' \
-              'https://v2c.cloud/kong/v2c_service/thirdparty/device/reported?deviceId=YOUR_DEVICE_ID' \
+              'https://v2c.cloud/kong/v2c_service/device/reported?deviceId=YOUR_DEVICE_ID' \
               -H 'apikey: {APIKEY}'
-  /device/rfid:
+  /device/connected:
     get:
       tags:
-        - RFID
-      summary: Get RFID CARD values from device
-      description: Gets the list of RFID cards registered on the device.
-      operationId: getRFIDCommand
+        - Device Status & Data Retrieval
+      summary: Check Device Connectivity Status
+      description: Checks if the device is currently connected to the V2C Cloud service.
+      operationId: isConnected
       parameters:
         - name: deviceId
           in: query
@@ -1044,13 +1203,45 @@ paths:
           label: 'cURL'
           source: |
             curl -X 'GET' \
-              'https://v2c.cloud/kong/v2c_service/thirdparty/device/rfid?deviceId=YOUR_DEVICE_ID' \
+              'https://v2c.cloud/kong/v2c_service/device/connected?deviceId=YOUR_DEVICE_ID' \
               -H 'apikey: {APIKEY}'
+  /device/wifilist:
+    get:
+      tags:
+        - Device Status & Data Retrieval
+      summary: Scan for Visible WiFi Networks
+      description: Sends a command to the device to scan and return a list of all visible WiFi networks in its vicinity.
+      operationId: getWifiListCommand
+      parameters:
+        - name: id
+          in: query
+          description: The device's ID
+          required: true
+          schema:
+            type: string
+          example: 'YOUR_DEVICE_ID'
+      responses:
+        '200':
+          description: Command executed successfully
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '500':
+          description: Server Exception
+      x-codeSamples:
+        - lang: curl
+          label: 'cURL'
+          source: |
+            curl -X 'GET' \
+              'https://v2c.cloud/kong/v2c_service/device/wifilist?id=YOUR_DEVICE_ID' \
+              -H 'apikey: {APIKEY}'
+  /device/rfid:
     post:
       tags:
-        - RFID
-      summary: Activates CREATE CARD MODE on device
-      description: Puts the device in learning mode to add a new RFID card.
+        - RFID Management
+      summary: Activate RFID Card Learning Mode
+      description: Puts the device into a learning state to read and register a new physical RFID card.
       operationId: executeSetTagRFIDCommand
       parameters:
         - name: deviceId
@@ -1079,13 +1270,13 @@ paths:
           label: 'cURL'
           source: |
             curl -X 'POST' \
-              'https://v2c.cloud/kong/v2c_service/thirdparty/device/rfid?deviceId=YOUR_DEVICE_ID&tag=NewCardName' \
+              'https://v2c.cloud/kong/v2c_service/device/rfid?deviceId=YOUR_DEVICE_ID&tag=NewCardName' \
               -H 'apikey: {APIKEY}'
     delete:
       tags:
-        - RFID
-      summary: Deleted RFID CARD on device
-      description: Deletes an RFID card from the device using its code (UID).
+        - RFID Management
+      summary: Delete Registered RFID Card by Code
+      description: Deletes an RFID card from the device's whitelist using its unique code (UID).
       operationId: executeDeleteTagRFIDCommand
       parameters:
         - name: deviceId
@@ -1114,15 +1305,14 @@ paths:
           label: 'cURL'
           source: |
             curl -X 'DELETE' \
-              'https://v2c.cloud/kong/v2c_service/thirdparty/device/rfid?deviceId=YOUR_DEVICE_ID&code=RFID_UID_TO_DELETE' \
+              'https://v2c.cloud/kong/v2c_service/device/rfid?deviceId=YOUR_DEVICE_ID&code=RFID_UID_TO_DELETE' \
               -H 'apikey: {APIKEY}'
-  /device/rfid/tag:
-    put:
+    get:
       tags:
-        - RFID
-      summary: Update RFID Tag
-      description: Updates the name (tag) of an existing RFID card.
-      operationId: executeUpdateTagRFIDCommand
+        - RFID Management
+      summary: Retrieve Registered RFID Cards
+      description: Gets the list of all RFID cards currently registered on the device.
+      operationId: getRFIDCommand
       parameters:
         - name: deviceId
           in: query
@@ -1130,18 +1320,6 @@ paths:
           schema:
             type: string
           example: 'YOUR_DEVICE_ID'
-        - name: code
-          in: query
-          required: true
-          schema:
-            type: string
-          example: 'RFID_UID_TO_UPDATE'
-        - name: tag
-          in: query
-          required: true
-          schema:
-            type: string
-          example: 'UpdatedCardName'
       responses:
         '200':
           description: Command executed successfully
@@ -1155,14 +1333,15 @@ paths:
         - lang: curl
           label: 'cURL'
           source: |
-            curl -X 'PUT' \
-              'https://v2c.cloud/kong/v2c_service/thirdparty/device/rfid/tag?deviceId=YOUR_DEVICE_ID&code=RFID_UID_TO_UPDATE&tag=UpdatedCardName' \
+            curl -X 'GET' \
+              'https://v2c.cloud/kong/v2c_service/device/rfid?deviceId=YOUR_DEVICE_ID' \
               -H 'apikey: {APIKEY}'
+  /device/rfid/tag:
     post:
       tags:
-        - RFID
-      summary: Create RFID Tag
-      description: Manually adds an RFID card to the device, specifying its code (UID) and name.
+        - RFID Management
+      summary: Manually Register RFID Card
+      description: Manually adds an RFID card to the device's whitelist by specifying its code (UID) and a name (tag).
       operationId: executeSetFullRFIDCommand
       parameters:
         - name: deviceId
@@ -1197,14 +1376,55 @@ paths:
           label: 'cURL'
           source: |
             curl -X 'POST' \
-              'https://v2c.cloud/kong/v2c_service/thirdparty/device/rfid/tag?deviceId=YOUR_DEVICE_ID&code=NEW_RFID_UID&tag=ManualCardName' \
+              'https://v2c.cloud/kong/v2c_service/device/rfid/tag?deviceId=YOUR_DEVICE_ID&code=NEW_RFID_UID&tag=ManualCardName' \
+              -H 'apikey: {APIKEY}'
+    put:
+      tags:
+        - RFID Management
+      summary: Update RFID Card Name (Tag)
+      description: Updates the friendly name (tag) associated with an existing registered RFID card code.
+      operationId: executeUpdateTagRFIDCommand
+      parameters:
+        - name: deviceId
+          in: query
+          required: true
+          schema:
+            type: string
+          example: 'YOUR_DEVICE_ID'
+        - name: code
+          in: query
+          required: true
+          schema:
+            type: string
+          example: 'RFID_UID_TO_UPDATE'
+        - name: tag
+          in: query
+          required: true
+          schema:
+            type: string
+          example: 'UpdatedCardName'
+      responses:
+        '200':
+          description: Command executed successfully
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '500':
+          description: Server Exception
+      x-codeSamples:
+        - lang: curl
+          label: 'cURL'
+          source: |
+            curl -X 'PUT' \
+              'https://v2c.cloud/kong/v2c_service/device/rfid/tag?deviceId=YOUR_DEVICE_ID&code=RFID_UID_TO_UPDATE&tag=UpdatedCardName' \
               -H 'apikey: {APIKEY}'
   /device/set_rfid:
     post:
       tags:
-        - RFID
-      summary: Update SET_RFID value on device
-      description: 'Activates or deactivates the RFID reader. 0: rfid reader off, 1: rfid reader on.'
+        - RFID Management
+      summary: Enable/Disable RFID Reader
+      description: 'Activates or deactivates the physical RFID reader functionality on the device. 0: Reader Off, 1: Reader On.'
       operationId: executeSetPropertyRFIDCommand
       parameters:
         - name: deviceId
@@ -1234,14 +1454,14 @@ paths:
           label: 'cURL'
           source: |
             curl -X 'POST' \
-              'https://v2c.cloud/kong/v2c_service/thirdparty/device/set_rfid?deviceId=YOUR_DEVICE_ID&value=1' \
+              'https://v2c.cloud/kong/v2c_service/device/set_rfid?deviceId=YOUR_DEVICE_ID&value=1' \
               -H 'apikey: {APIKEY}'
   /stadistic/device:
     get:
       tags:
-        - Statistics
-      summary: Get STATISTICS from device
-      description: Gets the last 5 charging statistics for a device, optionally filtered by date range.
+        - Charging Statistics
+      summary: Retrieve Charging Statistics by Device
+      description: Gets the last 5 charging statistics for a specific device, with optional filtering by date range.
       operationId: getStadisticsByDevice
       parameters:
         - name: deviceId
@@ -1272,7 +1492,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Stadistic'
+                  $ref: '#/components/schemas/Statistic'
         '500':
           description: Server Exception
       x-codeSamples:
@@ -1280,20 +1500,20 @@ paths:
           label: 'cURL (No Dates)'
           source: |
             curl -X 'GET' \
-              'https://v2c.cloud/kong/v2c_service/thirdparty/stadistic/device?deviceId=YOUR_DEVICE_ID' \
+              'https://v2c.cloud/kong/v2c_service/stadistic/device?deviceId=YOUR_DEVICE_ID' \
               -H 'apikey: {APIKEY}'
         - lang: curl
           label: 'cURL (With Dates)'
           source: |
             curl -X 'GET' \
-              'https://v2c.cloud/kong/v2c_service/thirdparty/stadistic/device?deviceId=YOUR_DEVICE_ID&chargeDateStart=2023-01-01&chargeDateEnd=2023-01-31' \
+              'https://v2c.cloud/kong/v2c_service/stadistic/device?deviceId=YOUR_DEVICE_ID&chargeDateStart=2023-01-01&chargeDateEnd=2023-01-31' \
               -H 'apikey: {APIKEY}'
   /stadistic/global/me:
     get:
       tags:
-        - Statistics
-      summary: Get STATISTICS from all my devices
-      description: Gets global (aggregated) statistics for all user's devices.
+        - Charging Statistics
+      summary: Retrieve Global Charging Statistics
+      description: Gets aggregated (global) charging statistics for all devices associated with the authenticated user, optionally filtered by date range.
       operationId: getGlobalStadisticMe
       parameters:
         - name: endChargeDateStart
@@ -1326,409 +1546,33 @@ paths:
           label: 'cURL'
           source: |
             curl -X 'GET' \
-              'https://v2c.cloud/kong/v2c_service/thirdparty/stadistic/global/me?endChargeDateStart=2023-01-01&endChargeDateEnd=2023-01-31' \
-              -H 'apikey: {APIKEY}'
-  /device/update:
-    post:
-      tags:
-        - Firmware
-      summary: Execute UPDATE command on device
-      description: Sends a command to the device to search for and install the latest firmware update.
-      operationId: updateVersion
-      parameters:
-        - name: deviceId
-          in: query
-          required: true
-          schema:
-            type: string
-          example: 'YOUR_DEVICE_ID'
-      responses:
-        '200':
-          description: Command executed successfully
-        '400':
-          description: Bad Request
-        '401':
-          description: Unauthorized
-        '500':
-          description: Server Exception
-      x-codeSamples:
-        - lang: curl
-          label: 'cURL'
-          source: |
-            curl -X 'POST' \
-              'https://v2c.cloud/kong/v2c_service/thirdparty/device/update?deviceId=YOUR_DEVICE_ID' \
-              -H 'apikey: {APIKEY}'
-  /version:
-    get:
-      tags:
-        - Firmware
-      summary: Get VERSION of my device
-      description: Gets the current firmware version of the device.
-      operationId: getMyVersion
-      parameters:
-        - name: deviceId
-          in: query
-          required: true
-          schema:
-            type: string
-          example: 'YOUR_DEVICE_ID'
-      responses:
-        '200':
-          description: Command executed successfully
-        '401':
-          description: Unauthorized
-        '404':
-          description: Device version not found
-        '500':
-          description: Server Exception
-      x-codeSamples:
-        - lang: curl
-          label: 'cURL'
-          source: |
-            curl -X 'GET' \
-              'https://v2c.cloud/kong/v2c_service/thirdparty/version?deviceId=YOUR_DEVICE_ID' \
-              -H 'apikey: {APIKEY}'
-  /pairings/me:
-    get:
-      tags:
-        - Pairing
-      summary: Get my own pairings
-      description: Gets the list of pairings associated with the user.
-      operationId: getPairingsMe
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/PairingDTO'
-        '500':
-          description: Server Exception
-      x-codeSamples:
-        - lang: curl
-          label: 'cURL'
-          source: |
-            curl -X 'GET' \
-              'https://v2c.cloud/kong/v2c_service/thirdparty/pairings/me' \
-              -H 'apikey: {APIKEY}'
-  /device/ocpp:
-    post:
-      tags:
-        - Device Actions
-      summary: Update OCPP value on device
-      description: 'Activates or deactivates the OCPP functionality. 0: OCPP off, 1: OCPP on.'
-      operationId: executeChangeOcppCommand
-      parameters:
-        - name: id
-          in: query
-          description: The device's id
-          required: true
-          schema:
-            type: string
-          example: 'YOUR_DEVICE_ID'
-        - name: value
-          in: query
-          required: true
-          schema:
-            type: string
-            enum: ['0', '1']
-          example: '1'
-      responses:
-        '200':
-          description: Command executed successfully
-        '400':
-          description: Bad Request
-        '401':
-          description: Unauthorized
-        '500':
-          description: Server Exception
-      x-codeSamples:
-        - lang: curl
-          label: 'cURL'
-          source: |
-            curl -X 'POST' \
-              'https://v2c.cloud/kong/v2c_service/thirdparty/device/ocpp?id=YOUR_DEVICE_ID&value=1' \
-              -H 'apikey: {APIKEY}'
-  /device/ocpp_id:
-    post:
-      tags:
-        - Device Actions
-      summary: Update OCPP ID value on device
-      description: Configures the OCPP ID for the device.
-      operationId: executeChangeOcppIdCommand
-      parameters:
-        - name: id
-          in: query
-          description: The device's id
-          required: true
-          schema:
-            type: string
-          example: 'YOUR_DEVICE_ID'
-        - name: value
-          in: query
-          required: true
-          schema:
-            type: string
-          example: 'V2C_Charger_001'
-      responses:
-        '200':
-          description: Command executed successfully
-        '400':
-          description: Bad Request
-        '401':
-          description: Unauthorized
-        '500':
-          description: Server Exception
-      x-codeSamples:
-        - lang: curl
-          label: 'cURL'
-          source: |
-            curl -X 'POST' \
-              'https://v2c.cloud/kong/v2c_service/thirdparty/device/ocpp_id?id=YOUR_DEVICE_ID&value=V2C_Charger_001' \
-              -H 'apikey: {APIKEY}'
-  /device/ocpp_addr:
-    post:
-      tags:
-        - Device Actions
-      summary: Update OCPP address value on device
-      description: Configures the OCPP server address (URL).
-      operationId: executeChangeOcppAddrCommand
-      parameters:
-        - name: id
-          in: query
-          description: The device's id
-          required: true
-          schema:
-            type: string
-          example: 'YOUR_DEVICE_ID'
-        - name: value
-          in: query
-          required: true
-          schema:
-            type: string
-          example: 'ws://ocpp.server.com/endpoint'
-      responses:
-        '200':
-          description: Command executed successfully
-        '400':
-          description: Bad Request
-        '401':
-          description: Unauthorized
-        '500':
-          description: Server Exception
-      x-codeSamples:
-        - lang: curl
-          label: 'cURL'
-          source: |
-            curl -X 'POST' \
-              'https://v2c.cloud/kong/v2c_service/thirdparty/device/ocpp_addr?id=YOUR_DEVICE_ID&value=ws%3A%2F%2Focpp.server.com%2Fendpoint' \
-              -H 'apikey: {APIKEY}'
-  /device/local_load_balancing:
-    post:
-      tags:
-        - Device Actions
-      summary: Update local load balancing value on device
-      description: 'Activates or deactivates local load balancing. 0: off, 1: on.'
-      deprecated: true
-      operationId: executeChangeLocalLoadBalancingCommand
-      parameters:
-        - name: id
-          in: query
-          description: The device's id
-          required: true
-          schema:
-            type: string
-          example: 'YOUR_DEVICE_ID'
-        - name: value
-          in: query
-          required: true
-          schema:
-            type: string
-            enum: ['0', '1']
-          example: '1'
-      responses:
-        '200':
-          description: Command executed successfully
-        '400':
-          description: Bad Request
-        '401':
-          description: Unauthorized
-        '500':
-          description: Server Exception
-      x-codeSamples:
-        - lang: curl
-          label: 'cURL'
-          source: |
-            curl -X 'POST' \
-              'https://v2c.cloud/kong/v2c_service/thirdparty/device/local_load_balancing?id=YOUR_DEVICE_ID&value=1' \
-              -H 'apikey: {APIKEY}'
-  /device/wifilist:
-    get:
-      tags:
-        - Device Service
-      summary: Get list of wifi networks detected by device
-      description: Asks the device to scan and return a list of visible WiFi networks.
-      operationId: getWifiListCommand
-      parameters:
-        - name: id
-          in: query
-          description: The device's id
-          required: true
-          schema:
-            type: string
-          example: 'YOUR_DEVICE_ID'
-      responses:
-        '200':
-          description: Command executed successfully
-        '400':
-          description: Bad Request
-        '401':
-          description: Unauthorized
-        '500':
-          description: Server Exception
-      x-codeSamples:
-        - lang: curl
-          label: 'cURL'
-          source: |
-            curl -X 'GET' \
-              'https://v2c.cloud/kong/v2c_service/thirdparty/device/wifilist?id=YOUR_DEVICE_ID' \
-              -H 'apikey: {APIKEY}'
-  /device/personalicepower/:
-    post:
-      tags:
-        - Personalized Power
-      summary: Update personal power
-      deprecated: true
-      operationId: updatePersonalicePower
-      parameters:
-        - name: id
-          in: query
-          description: The device's id
-          required: true
-          schema:
-            type: string
-          example: 'YOUR_DEVICE_ID'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PersonalPower'
-      responses:
-        '200':
-          description: OK
-        '401':
-          description: Unauthorized
-        '404':
-          description: Not Found
-        '500':
-          description: Exception
-      x-codeSamples:
-        - lang: curl
-          label: 'cURL'
-          source: |
-            curl -X 'POST' \
-              'https://v2c.cloud/kong/v2c_service/thirdparty/device/personalicepower/?id=YOUR_DEVICE_ID' \
-              -H 'apikey: {APIKEY}' \
-              -H 'Content-Type: application/json' \
-              -d '{
-                "mode": "solar",
-                "value": 32
-              }'
-    get:
-      tags:
-        - Personalized Power
-      summary: Get personal power
-      deprecated: true
-      operationId: getPersonalicePower
-      parameters:
-        - name: id
-          in: query
-          description: The device's id
-          required: true
-          schema:
-            type: string
-          example: 'YOUR_DEVICE_ID'
-      responses:
-        '200':
-          description: OK
-        '401':
-          description: Unauthorized
-        '404':
-          description: Not Found
-        '500':
-          description: Exception
-      x-codeSamples:
-        - lang: curl
-          label: 'cURL'
-          source: |
-            curl -X 'GET' \
-              'https://v2c.cloud/kong/v2c_service/thirdparty/device/personalicepower/?id=YOUR_DEVICE_ID' \
-              -H 'apikey: {APIKEY}'
-  /device/personalicepowermode/:
-    post:
-      tags:
-        - Personalized Power
-      summary: Update personal power
-      deprecated: true
-      operationId: updatePersonalicePowerMode
-      parameters:
-        - name: id
-          in: query
-          description: The device's id
-          required: true
-          schema:
-            type: string
-          example: 'YOUR_DEVICE_ID'
-        - name: mode
-          in: query
-          required: true
-          schema:
-            type: string
-          example: 'solar'
-      responses:
-        '200':
-          description: OK
-        '401':
-          description: Unauthorized
-        '404':
-          description: Not Found
-        '500':
-          description: Exception
-      x-codeSamples:
-        - lang: curl
-          label: 'cURL'
-          source: |
-            curl -X 'POST' \
-              'https://v2c.cloud/kong/v2c_service/thirdparty/device/personalicepowermode/?id=YOUR_DEVICE_ID&mode=solar' \
+              'https://v2c.cloud/kong/v2c_service/stadistic/global/me?endChargeDateStart=2023-01-01&endChargeDateEnd=2023-01-31' \
               -H 'apikey: {APIKEY}'
   /device/savepersonalicepower/v2:
     post:
       tags:
-        - Personalized Power
-      summary: Save personal power
-      description: Saves a new personalized power configuration (v2).
+        - Advanced Power Profiles
+      summary: Save New Advanced Power Profile (v2)
+      description: Creates and saves a new personalized power configuration profile.
       operationId: savePersonalicePower
       parameters:
         - name: deviceId
           in: query
-          description: The device's id
+          description: The device's ID
           required: true
           schema:
             type: string
           example: 'YOUR_DEVICE_ID'
         - name: name
           in: query
-          description: The device's name
+          description: The profile name
           required: true
           schema:
             type: string
           example: 'SolarMode'
         - name: updateAt
           in: query
-          description: The time when sended
+          description: The time when sent (for versioning/timestamping)
           required: true
           schema:
             type: string
@@ -1753,7 +1597,7 @@ paths:
           label: 'cURL'
           source: |
             curl -X 'POST' \
-              'https://v2c.cloud/kong/v2c_service/thirdparty/device/savepersonalicepower/v2?deviceId=YOUR_DEVICE_ID&name=SolarMode&updateAt=2023-10-27T10:00:00Z' \
+              'https://v2c.cloud/kong/v2c_service/device/savepersonalicepower/v2?deviceId=YOUR_DEVICE_ID&name=SolarMode&updateAt=2023-10-27T10:00:00Z' \
               -H 'apikey: {APIKEY}' \
               -H 'Content-Type: application/json' \
               -d '{
@@ -1763,28 +1607,28 @@ paths:
   /device/personalicepower/v2:
     post:
       tags:
-        - Personalized Power
-      summary: Update personal power
-      description: Updates a personalized power configuration (v2).
+        - Advanced Power Profiles
+      summary: Update Existing Advanced Power Profile (v2)
+      description: Updates an existing personalized power configuration profile.
       operationId: updatePersonalicePowerV2
       parameters:
         - name: id
           in: query
-          description: The device's id
+          description: The device's ID
           required: true
           schema:
             type: string
           example: 'YOUR_DEVICE_ID'
         - name: name
           in: query
-          description: The device's name
+          description: The profile name
           required: true
           schema:
             type: string
           example: 'SolarMode'
         - name: updateAt
           in: query
-          description: The time when sended
+          description: The time when sent (for versioning/timestamping)
           required: true
           schema:
             type: string
@@ -1809,7 +1653,7 @@ paths:
           label: 'cURL'
           source: |
             curl -X 'POST' \
-              'https://v2c.cloud/kong/v2c_service/thirdparty/device/personalicepower/v2?id=YOUR_DEVICE_ID&name=SolarMode&updateAt=2023-10-27T10:01:00Z' \
+              'https://v2c.cloud/kong/v2c_service/device/personalicepower/v2?id=YOUR_DEVICE_ID&name=SolarMode&updateAt=2023-10-27T10:01:00Z' \
               -H 'apikey: {APIKEY}' \
               -H 'Content-Type: application/json' \
               -d '{
@@ -1818,21 +1662,21 @@ paths:
               }'
     get:
       tags:
-        - Personalized Power
-      summary: Get personal power
-      description: Gets a personalized power configuration (v2).
+        - Advanced Power Profiles
+      summary: Retrieve Specific Advanced Power Profile (v2)
+      description: Retrieves a single personalized power configuration profile using its timestamp.
       operationId: getPersonalicePowerv2
       parameters:
         - name: deviceId
           in: query
-          description: The device's id
+          description: The device's ID
           required: true
           schema:
             type: string
           example: 'YOUR_DEVICE_ID'
         - name: updateAt
           in: query
-          description: The time when sended
+          description: The profile timestamp
           required: true
           schema:
             type: string
@@ -1851,18 +1695,18 @@ paths:
           label: 'cURL'
           source: |
             curl -X 'GET' \
-              'https://v2c.cloud/kong/v2c_service/thirdparty/device/personalicepower/v2?deviceId=YOUR_DEVICE_ID&updateAt=2023-10-27T10:00:00Z' \
+              'https://v2c.cloud/kong/v2c_service/device/personalicepower/v2?deviceId=YOUR_DEVICE_ID&updateAt=2023-10-27T10:00:00Z' \
               -H 'apikey: {APIKEY}'
     delete:
       tags:
-        - Personalized Power
-      summary: Delete personal power
-      description: Deletes a personalized power configuration (v2).
+        - Advanced Power Profiles
+      summary: Delete Advanced Power Profile (v2)
+      description: Deletes a personalized power configuration profile by its name and timestamp.
       operationId: deletePersonalicePower
       parameters:
         - name: deviceId
           in: query
-          description: The device's id
+          description: The device's ID
           required: true
           schema:
             type: string
@@ -1876,7 +1720,7 @@ paths:
           example: 'SolarMode'
         - name: updateAt
           in: query
-          description: The time when sended
+          description: The profile timestamp
           required: true
           schema:
             type: string
@@ -1895,19 +1739,19 @@ paths:
           label: 'cURL'
           source: |
             curl -X 'DELETE' \
-              'https://v2c.cloud/kong/v2c_service/thirdparty/device/personalicepower/v2?deviceId=YOUR_DEVICE_ID&name=SolarMode&updateAt=2023-10-27T10:00:00Z' \
+              'https://v2c.cloud/kong/v2c_service/device/personalicepower/v2?deviceId=YOUR_DEVICE_ID&name=SolarMode&updateAt=2023-10-27T10:00:00Z' \
               -H 'apikey: {APIKEY}'
   /device/personalicepower/all:
     get:
       tags:
-        - Personalized Power
-      summary: Get all personal power
-      description: Gets all personalized power configurations for a device (v2).
+        - Advanced Power Profiles
+      summary: Retrieve All Advanced Power Profiles
+      description: Gets a list of all personalized power configuration profiles associated with the device.
       operationId: getAllPersonalicePower
       parameters:
         - name: deviceId
           in: query
-          description: The device's id
+          description: The device's ID
           required: true
           schema:
             type: string
@@ -1926,29 +1770,131 @@ paths:
           label: 'cURL'
           source: |
             curl -X 'GET' \
-              'https://v2c.cloud/kong/v2c_service/thirdparty/device/personalicepower/all?deviceId=YOUR_DEVICE_ID' \
+              'https://v2c.cloud/kong/v2c_service/device/personalicepower/all?deviceId=YOUR_DEVICE_ID' \
               -H 'apikey: {APIKEY}'
-  /device/inverter_ip:
+  /device/personalicepower/:
     post:
       tags:
-        - Device Actions
-      summary: Execute change inverter ip command on device
-      description: Configures the inverter's IP address (e.g., Huawei) on the device.
-      operationId: executeChangeHuaweiIPCommand
+        - Advanced Power Profiles
+      summary: Update Personal Power (Deprecated)
+      deprecated: true
+      operationId: updatePersonalicePower
       parameters:
         - name: id
           in: query
-          description: The device's id
+          description: The device's ID
           required: true
           schema:
             type: string
           example: 'YOUR_DEVICE_ID'
-        - name: value
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PersonalPower'
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Unauthorized
+        '404':
+          description: Not Found
+        '500':
+          description: Exception
+      x-codeSamples:
+        - lang: curl
+          label: 'cURL'
+          source: |
+            curl -X 'POST' \
+              'https://v2c.cloud/kong/v2c_service/device/personalicepower/?id=YOUR_DEVICE_ID' \
+              -H 'apikey: {APIKEY}' \
+              -H 'Content-Type: application/json' \
+              -d '{
+                "mode": "solar",
+                "value": 32
+              }'
+    get:
+      tags:
+        - Advanced Power Profiles
+      summary: Retrieve Personal Power (Deprecated)
+      deprecated: true
+      operationId: getPersonalicePower
+      parameters:
+        - name: id
+          in: query
+          description: The device's ID
+          required: true
+          schema:
+            type: string
+          example: 'YOUR_DEVICE_ID'
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Unauthorized
+        '404':
+          description: Not Found
+        '500':
+          description: Exception
+      x-codeSamples:
+        - lang: curl
+          label: 'cURL'
+          source: |
+            curl -X 'GET' \
+              'https://v2c.cloud/kong/v2c_service/device/personalicepower/?id=YOUR_DEVICE_ID' \
+              -H 'apikey: {APIKEY}'
+  /device/personalicepowermode/:
+    post:
+      tags:
+        - Advanced Power Profiles
+      summary: Set Personal Power Mode (Deprecated)
+      deprecated: true
+      operationId: updatePersonalicePowerMode
+      parameters:
+        - name: id
+          in: query
+          description: The device's ID
+          required: true
+          schema:
+            type: string
+          example: 'YOUR_DEVICE_ID'
+        - name: mode
           in: query
           required: true
           schema:
             type: string
-          example: '192.168.1.100'
+          example: 'solar'
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Unauthorized
+        '404':
+          description: Not Found
+        '500':
+          description: Exception
+      x-codeSamples:
+        - lang: curl
+          label: 'cURL'
+          source: |
+            curl -X 'POST' \
+              'https://v2c.cloud/kong/v2c_service/device/personalicepowermode/?id=YOUR_DEVICE_ID&mode=solar' \
+              -H 'apikey: {APIKEY}'
+  /device/update:
+    post:
+      tags:
+        - Firmware Management
+      summary: Initiate Firmware Update
+      description: Sends a command to the device to search for and install the latest available firmware update.
+      operationId: updateVersion
+      parameters:
+        - name: deviceId
+          in: query
+          required: true
+          schema:
+            type: string
+          example: 'YOUR_DEVICE_ID'
       responses:
         '200':
           description: Command executed successfully
@@ -1963,7 +1909,62 @@ paths:
           label: 'cURL'
           source: |
             curl -X 'POST' \
-              'https://v2c.cloud/kong/v2c_service/thirdparty/device/inverter_ip?id=YOUR_DEVICE_ID&value=192.168.1.100' \
+              'https://v2c.cloud/kong/v2c_service/device/update?deviceId=YOUR_DEVICE_ID' \
+              -H 'apikey: {APIKEY}'
+  /version:
+    get:
+      tags:
+        - Firmware Management
+      summary: Retrieve Device Firmware Version
+      description: Gets the current firmware version string of the specified device.
+      operationId: getMyVersion
+      parameters:
+        - name: deviceId
+          in: query
+          required: true
+          schema:
+            type: string
+          example: 'YOUR_DEVICE_ID'
+      responses:
+        '200':
+          description: Command executed successfully
+        '401':
+          description: Unauthorized
+        '404':
+          description: Device version not found
+        '500':
+          description: Server Exception
+      x-codeSamples:
+        - lang: curl
+          label: 'cURL'
+          source: |
+            curl -X 'GET' \
+              'https://v2c.cloud/kong/v2c_service/version?deviceId=YOUR_DEVICE_ID' \
+              -H 'apikey: {APIKEY}'
+  /pairings/me:
+    get:
+      tags:
+        - Pairing Management
+      summary: Retrieve All User Pairings
+      description: Gets the list of all device pairings associated with the authenticated user.
+      operationId: getPairingsMe
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PairingDTO'
+        '500':
+          description: Server Exception
+      x-codeSamples:
+        - lang: curl
+          label: 'cURL'
+          source: |
+            curl -X 'GET' \
+              'https://v2c.cloud/kong/v2c_service/pairings/me' \
               -H 'apikey: {APIKEY}'
 components:
   securitySchemes:
@@ -1971,11 +1972,81 @@ components:
       type: apiKey
       in: header
       name: apikey
-      description: 'Personal API Key to authenticate requests. It is obtained from the V2C portal.'
+      description: 'Personal API Key required for authentication, obtained from the V2C user portal.'
   schemas:
+    CurrentStateChargeResponse:
+      type: object
+      description: Real-time operational data and status of the device during a charging session.
+      properties:
+        error:
+          type: string
+          description: Error code or message if dynamic control reports a fault. An empty string indicates no current error.
+          example: '244'
+        battery:
+          type: string
+          description: Battery value reported by the dynamic control system.
+          example: '0.000000'
+        voltage:
+          type: string
+          description: Charger's current voltage value (V).
+          example: '230.50'
+        intensity:
+          type: string
+          description: Current charging current (A).
+          example: '6'
+        seconds:
+          type: string
+          description: Duration of the current charging session in seconds.
+          example: '93'
+        photovoltaic_on:
+          type: string
+          description: Status of the Photovoltaic (PV) charging mode. 0-> Off, 1->On.
+          example: '1'
+        house_power:
+          type: string
+          description: Total current household power consumption (kW).
+          example: '3.500000'
+        charge_state:
+          type: string
+          description: 'Current state of the charging process.'
+          enum:
+            - '0'
+            - '1'
+            - '2'
+            - '3'
+            - '4'
+            - '5'
+          x-enum-descriptions:
+            '0': Disconnected
+            '1': Vehicle Connected, Not Charging
+            '2': Charging
+            '3': Ventilation Required
+            '4': Control Pilot Short Circuit
+            '5': General Fault
+          example: '2'
+        power:
+          type: string
+          description: Power currently delivered to the vehicle (kW).
+          example: '1.380000'
+        sun_power:
+          type: string
+          description: Power reported from the solar panels (kW).
+          example: '1.500000'
+        phases:
+          type: string
+          description: Number of phases currently used for charging (1 or 3).
+          example: '1'
+        cp_level:
+          type: string
+          description: Control Pilot (CP) signal level (V).
+          example: '248.000000'
+        energy:
+          type: string
+          description: Total energy delivered in the current charging session (kWh).
+          example: '0.000000'
     TimerDTO:
       type: object
-      description: "Data for programming a timer on the device."
+      description: "Data structure for programming a charging timer on the device."
       properties:
         start_time:
           type: string
@@ -1990,7 +2061,7 @@ components:
           example: true
     PersonalPower:
       type: object
-      description: "Personalized power configuration."
+      description: "Model for an Advanced Power Profile configuration."
       properties:
         mode:
           type: string
@@ -2000,7 +2071,7 @@ components:
           example: 32
     PairingDTO:
       type: object
-      description: "Pairing data."
+      description: "Device pairing information."
       properties:
         id:
           type: string
@@ -2008,25 +2079,95 @@ components:
         name:
           type: string
           example: 'My Pairing'
-    Stadistic:
+    Statistic:
       type: object
-      description: "Charging session data (statistic)."
+      description: Detailed statistics for a single charging session. Returns the last 5 sessions if no date range is specified.
       properties:
-        chargeId:
+        id:
+          type: integer
+          description: Unique identifier for the charging record.
+          example: 17307150
+        deviceId:
           type: string
-          example: 'charge_id_abc'
+          description: Unique identifier of the device (charger).
+          example: "QRPW7LV"
+        startChargeDate:
+          type: string
+          format: date-time
+          description: Date and time when the charging session began.
+          example: "2025-10-28T11:44:47"
+        endChargeDate:
+          type: string
+          format: date-time
+          description: Date and time when the charging session ended.
+          example: "2025-10-28T14:45:05"
+        idCharge:
+          type: string
+          description: Secondary identifier for the charge session (often a formatted timestamp).
+          example: "2025-10-28 11:44:47"
         energy:
           type: number
-          example: 10.5
-        startTime:
+          format: float
+          description: Total energy consumed during the session (kWh).
+          example: 9.6
+        cost:
+          type: number
+          format: float
+          description: Total monetary cost of the charge session.
+          example: 1.44
+        coCost:
+          type: number
+          format: float
+          description: Cost associated with CO2 (carbon offset cost).
+          example: 2.976
+        costFv:
+          type: number
+          format: float
+          description: Monetary cost covered by Photovoltaic (FV) energy.
+          example: 0.0
+        energyByHour:
+          type: string
+          description: Energy consumed per hour, usually represented as a pipe-separated string (e.g., '0.9|3.5|3.6|1.6').
+          example: "0.9|3.5|3.6|1.6"
+        energyByHourFv:
+          type: string
+          nullable: true
+          description: Energy provided by Photovoltaic (FV) per hour. Null if no FV data is available.
+          example: null
+        rfidCode:
+          type: string
+          description: Unique code (UID) of the RFID card used to start the charge.
+          example: "aa23b601"
+        rfidName:
+          type: string
+          description: Friendly name associated with the RFID card used.
+          example: "Vicente"
+        message:
+          type: string
+          nullable: true
+          description: Optional status or informational message.
+          example: null
+        warning:
+          type: boolean
+          description: Indicates if a warning was registered during the session.
+          example: false
+        finished:
+          type: boolean
+          description: Indicates if the session finished correctly.
+          example: true
+        createdAt:
           type: string
           format: date-time
-        endTime:
+          description: Record creation timestamp on the cloud server.
+          example: "2025-10-28T10:44:52.000+00:00"
+        updatedAt:
           type: string
           format: date-time
+          description: Record last update timestamp on the cloud server.
+          example: "2025-10-28T13:45:07.000+00:00"
     GlobalStadisticInfo:
       type: object
-      description: "Global statistics information."
+      description: "Aggregated charging statistics across multiple devices or a period."
       properties:
         totalEnergy:
           type: number
