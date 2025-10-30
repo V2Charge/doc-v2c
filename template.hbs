@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf8" />
+    <title>{{title}} | V2C API Documentation - Smart EV Chargers</title>
+    
+    <meta name="description" content="Official V2C API documentation for Electric Vehicle (EV) charger integration. Provides remote control, RFID management, dynamic load balancing, and charging session statistics." />
+    <meta name="keywords" content="V2C, API, REST, OpenAPI, EV Charger, Smart Charging, Dynamic Load Balancing, RFID, e-Charger, charging point" />
+    <meta name="author" content="V2C Support" />
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" type="image/png" href="https://v2c.cloud/favicon.ico"/>
+    
+    <style>
+      body {
+        padding: 0;
+        margin: 0;
+        background-color: #ffffff; /* Neutral background color */
+        min-height: 100vh; 
+        display: flex;
+        flex-direction: column;
+      }
+      .redoc-container {
+        flex-grow: 1; 
+      }
+      .footer {
+        text-align: center;
+        padding: 20px 0;
+        background-color: #f7f7f7;
+        border-top: 1px solid #eee;
+        color: #666;
+        font-family: Arial, sans-serif;
+        font-size: 14px;
+        flex-shrink: 0;
+      }
+    </style>
+    
+    {{{redocHead}}}
+    {{#unless disableGoogleFont}}<link href="https://fonts.googleapis.com/css?family=Montserrat:300,400,700|Roboto:300,400,700" rel="stylesheet">{{/unless}}
+  </head>
+  <body>
+    <div class="redoc-container">
+      {{{redocHTML}}}
+    </div>
+    
+    <footer class="footer">
+      V2C &copy; 2025 All rights reserved.
+    </footer>
+    
+  </body>
+</html>

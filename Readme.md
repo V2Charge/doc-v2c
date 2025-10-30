@@ -47,7 +47,7 @@ To ensure that changes made in the **`openapi.yaml`** file are reflected in the 
 <!-- end list -->
 
 ```bash
-npx @redocly/cli build-docs openapi.yaml -o index.html
+npx @redocly/cli build-docs openapi.yaml -t template.hbs -o index.html
 ```
 
 This command will read the updated specification, apply the documentation theme, and overwrite the **`index.html`** file with the latest version.

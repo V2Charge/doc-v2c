@@ -1,6 +1,11 @@
 apis:
-  main:
-    root: ./openapi.yaml
+  v2c_api:
+    root: openapi.yaml
 
+openapi:
+  codeSamples:
+    skipOptionalParameters: true
+    languages:
+      - lang: 'curl'
+        label: 'cURL'
 
-disableSearch: true
