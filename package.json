@@ -1,0 +1,11 @@
+{
+  "name": "api-docs-portal",
+  "version": "1.0.0",
+  "scripts": {
+    "preview": "npx @redocly/cli preview-docs openapi.yaml",
+    "build": "npx @redocly/cli build-docs openapi.yaml -o index.html"
+  },
+  "devDependencies": {
+    "@redocly/cli": "^1.16.0"
+  }
+}
