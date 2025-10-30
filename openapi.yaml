@@ -26,6 +26,11 @@ info:
   contact:
     name: V2C Support
     email: info@v2charge.com
+  x-logo: # <--- ADD THIS SECTION
+    url: https://v2charge.com/wp-content/uploads/2024/11/cropped-v2c-charge-logo-menu.png 
+    altText: V2C Logo
+    backgroundColor: '#FFFFFF' # Optional: Background color behind the logo
+    href: https://v2charge.com
 servers:
   - url: https://v2c.cloud/kong/v2c_service/
     description: V2C Production Server
@@ -1010,42 +1015,6 @@ paths:
             curl -X 'POST' \
               'https://v2c.cloud/kong/v2c_service/device/reboot?deviceId=YOUR_DEVICE_ID' \
               -H 'apikey: {APIKEY}'
-  /device/apk2:
-    post:
-      tags:
-        - Device Control & Configuration
-      summary: Execute APK2 Command
-      description: Executes an internal APK2 command on the device.
-      operationId: executeAPK2Command
-      parameters:
-        - name: deviceId
-          in: query
-          required: true
-          schema:
-            type: string
-          example: 'YOUR_DEVICE_ID'
-        - name: value
-          in: query
-          required: true
-          schema:
-            type: string
-          example: 'some_value'
-      responses:
-        '200':
-          description: Command executed successfully
-        '400':
-          description: Bad Request
-        '401':
-          description: Unauthorized
-        '500':
-          description: Server Exception
-      x-codeSamples:
-        - lang: curl
-          label: 'cURL'
-          source: |
-            curl -X 'POST' \
-              'https://v2c.cloud/kong/v2c_service/device/apk2?deviceId=YOUR_DEVICE_ID&value=some_value' \
-              -H 'apikey: {APIKEY}'
   /device/currentstatecharge:
     post:
       tags:
@@ -1105,45 +1074,6 @@ paths:
           source: |
             curl -X 'POST' \
               'https://v2c.cloud/kong/v2c_service/thirdparty/device/currentstatecharge?deviceId=YOUR_DEVICE_ID' \
-              -H 'apikey: {APIKEY}'
-  /device/local_load_balancing:
-    post:
-      tags:
-        - Device Control & Configuration
-      summary: Enable/Disable Local Load Balancing (Deprecated)
-      description: 'Activates or deactivates local load balancing functionality. 0: Off, 1: On. This endpoint is deprecated, use /device/dynamic instead for dynamic load control.'
-      deprecated: true
-      operationId: executeChangeLocalLoadBalancingCommand
-      parameters:
-        - name: id
-          in: query
-          description: The device's ID
-          required: true
-          schema:
-            type: string
-          example: 'YOUR_DEVICE_ID'
-        - name: value
-          in: query
-          required: true
-          schema:
-            type: string
-            enum: ['0', '1']
-          example: '1'
-      responses:
-        '200':
-          description: Command executed successfully
-        '400':
-          description: Bad Request
-        '401':
-          description: Unauthorized
-        '500':
-          description: Server Exception
-      x-codeSamples:
-        - lang: curl
-          label: 'cURL'
-          source: |
-            curl -X 'POST' \
-              'https://v2c.cloud/kong/v2c_service/device/local_load_balancing?id=YOUR_DEVICE_ID&value=1' \
               -H 'apikey: {APIKEY}'
   /device/reported:
     get:
@@ -1771,115 +1701,6 @@ paths:
           source: |
             curl -X 'GET' \
               'https://v2c.cloud/kong/v2c_service/device/personalicepower/all?deviceId=YOUR_DEVICE_ID' \
-              -H 'apikey: {APIKEY}'
-  /device/personalicepower/:
-    post:
-      tags:
-        - Advanced Power Profiles
-      summary: Update Personal Power (Deprecated)
-      deprecated: true
-      operationId: updatePersonalicePower
-      parameters:
-        - name: id
-          in: query
-          description: The device's ID
-          required: true
-          schema:
-            type: string
-          example: 'YOUR_DEVICE_ID'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PersonalPower'
-      responses:
-        '200':
-          description: OK
-        '401':
-          description: Unauthorized
-        '404':
-          description: Not Found
-        '500':
-          description: Exception
-      x-codeSamples:
-        - lang: curl
-          label: 'cURL'
-          source: |
-            curl -X 'POST' \
-              'https://v2c.cloud/kong/v2c_service/device/personalicepower/?id=YOUR_DEVICE_ID' \
-              -H 'apikey: {APIKEY}' \
-              -H 'Content-Type: application/json' \
-              -d '{
-                "mode": "solar",
-                "value": 32
-              }'
-    get:
-      tags:
-        - Advanced Power Profiles
-      summary: Retrieve Personal Power (Deprecated)
-      deprecated: true
-      operationId: getPersonalicePower
-      parameters:
-        - name: id
-          in: query
-          description: The device's ID
-          required: true
-          schema:
-            type: string
-          example: 'YOUR_DEVICE_ID'
-      responses:
-        '200':
-          description: OK
-        '401':
-          description: Unauthorized
-        '404':
-          description: Not Found
-        '500':
-          description: Exception
-      x-codeSamples:
-        - lang: curl
-          label: 'cURL'
-          source: |
-            curl -X 'GET' \
-              'https://v2c.cloud/kong/v2c_service/device/personalicepower/?id=YOUR_DEVICE_ID' \
-              -H 'apikey: {APIKEY}'
-  /device/personalicepowermode/:
-    post:
-      tags:
-        - Advanced Power Profiles
-      summary: Set Personal Power Mode (Deprecated)
-      deprecated: true
-      operationId: updatePersonalicePowerMode
-      parameters:
-        - name: id
-          in: query
-          description: The device's ID
-          required: true
-          schema:
-            type: string
-          example: 'YOUR_DEVICE_ID'
-        - name: mode
-          in: query
-          required: true
-          schema:
-            type: string
-          example: 'solar'
-      responses:
-        '200':
-          description: OK
-        '401':
-          description: Unauthorized
-        '404':
-          description: Not Found
-        '500':
-          description: Exception
-      x-codeSamples:
-        - lang: curl
-          label: 'cURL'
-          source: |
-            curl -X 'POST' \
-              'https://v2c.cloud/kong/v2c_service/device/personalicepowermode/?id=YOUR_DEVICE_ID&mode=solar' \
               -H 'apikey: {APIKEY}'
   /device/update:
     post:
