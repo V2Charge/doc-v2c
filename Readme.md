@@ -51,3 +51,5 @@ npx @redocly/cli build-docs openapi.yaml -t template.hbs -o index.html
 ```
 
 This command will read the updated specification, apply the documentation theme, and overwrite the **`index.html`** file with the latest version.
+
+Search API docs by redoc and delete all div, replace redoc.standalone.js by redoc.js
