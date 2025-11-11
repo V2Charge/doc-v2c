@@ -499,7 +499,7 @@ paths:
           schema:
             type: string
           example: 'YOUR_DEVICE_ID'
-        - name: timer id
+        - name: timerId
           in: query
           required: true
           schema:
@@ -525,7 +525,7 @@ paths:
           label: 'cURL'
           source: |
             curl -X 'POST' \
-              'https://v2c.cloud/kong/v2c_service/device/timer?deviceId=YOUR_DEVICE_ID&timer%20id=1' \
+              'https://v2c.cloud/kong/v2c_service/device/timer?deviceId=YOUR_DEVICE_ID&timerId=1' \
               -H 'apikey: {APIKEY}' \
               -H 'Content-Type: application/json' \
               -d '{
