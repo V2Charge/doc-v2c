@@ -6,6 +6,6 @@
     "build": "npx @redocly/cli build-docs openapi.yaml -o index.html"
   },
   "devDependencies": {
-    "@redocly/cli": "^1.16.0"
+    "@redocly/cli": "^1.34.5"
   }
 }

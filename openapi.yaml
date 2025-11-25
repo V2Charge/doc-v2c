@@ -529,9 +529,9 @@ paths:
               -H 'apikey: {APIKEY}' \
               -H 'Content-Type: application/json' \
               -d '{
-                "start_time": "22:00",
-                "end_time": "06:00",
-                "active": true
+                "timeStart": "22:00",
+                "timeEnd": "06:00",
+                "daysOfWeek": "123"
               }'
   /device/inst_type:
     post:
@@ -1791,17 +1791,21 @@ components:
       type: object
       description: "Data structure for programming a charging timer on the device."
       properties:
-        start_time:
+        timeStart:
           type: string
           format: time
           example: '22:00'
-        end_time:
+        timeEnd:
           type: string
           format: time
           example: '06:00'
-        active:
-          type: boolean
-          example: true
+        daysOfWeek:
+          type: string
+          description: >
+            String of digits representing the days of the week on which the timer is active.
+            Accepted values: 1–7, where 1=Monday and 7=Sunday.
+            Example: "123" means Monday, Tuesday and Wednesday.
+          example: '123'
     PersonalPower:
       type: object
       description: "Model for an Advanced Power Profile configuration."
